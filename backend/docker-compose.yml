@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  # O NOSSO BANCO DE DADOS
+  db:
+    image: postgres:15-alpine
+    container_name: multiconn-postgres
+    # 💡 LÊ O SEU ARQUIVO .ENV DIRETAMENTE
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=multiconn_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # A NOSSA API (SPRING BOOT)
+  backend:
+    # Em vez de baixar uma imagem pronta, ele constrói a nossa usando o Dockerfile da pasta atual (.)
+    build: .
+    container_name: multiconn-backend
+    # Garante que o banco ligue antes do Java
+    depends_on:
+      - db
+    # 💡 LÊ O SEU ARQUIVO .ENV DIRETAMENTE
+    env_file:
+      - .env
+    ports:
+      # Mapeia a porta 8080 do PC para a porta 8080 do container
+      - "8080:8080"
+    environment:
+      # 💡 A RESOLUÇÃO DA PEGADINHA DO LOCALHOST:
+      # Nós sobrescrevemos a variável DATABASE_URL aqui.
+      # Em vez de localhost, usamos 'db' (o nome do serviço do banco ali em cima).
+      - DATABASE_URL=jdbc:postgresql://db:5432/multiconn_db
+
+volumes:
+  postgres_data:
