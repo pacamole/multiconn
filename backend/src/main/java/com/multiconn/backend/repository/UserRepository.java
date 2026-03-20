@@ -11,4 +11,6 @@ import com.multiconn.backend.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     public Optional<User> findByGoogleAccountId(String googleAccountId);
+
+    public Optional<User> findByEmail(String email);
 }

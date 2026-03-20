@@ -28,15 +28,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = gUser.getAttribute("name");
 
         userRepository.findByGoogleAccountId(googleId).orElseGet(() -> {
-            Wallet wallet = new Wallet();
-            wallet.setBalance(BigDecimal.ZERO);
-
             User user = User.builder()
                     .googleAccountId(googleId)
                     .email(email)
-                    .name(name)
-                    .wallet(wallet)
+                    .name(name) // needs to have setUser on the wallet object too
                     .build();
+
+            Wallet wallet = new Wallet();
+            wallet.setBalance(BigDecimal.ZERO);
+            wallet.setUser(user);
+
+            user.setWallet(wallet);
 
             return userRepository.save(user);
         });
